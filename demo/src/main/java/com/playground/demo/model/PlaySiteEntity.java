@@ -14,9 +14,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Entity
@@ -81,11 +79,14 @@ public class PlaySiteEntity {
   }
 
   public boolean removeChild(String ticketNumber) {
-    Optional<ChildEntity> first = children.stream()
-        .filter(child -> child.getTicketNumber().equals(ticketNumber))
-        .findFirst();
-    first.ifPresent(child -> child.setPlaySite(null));
-    return first.isPresent();
+    return children.removeIf(child -> {
+      if (child.getTicketNumber().equals(ticketNumber)) {
+        // Clear relationship with play site.
+        child.setPlaySite(null);
+        return true;
+      }
+      return false;
+    });
   }
 
   public boolean removeChildFromQueue(String ticketNumber) {
